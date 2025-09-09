@@ -1,0 +1,133 @@
+<html>
+	<head>
+	
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link rel="icon" href="/speedy/favicon.ico" type="image/x-icon">
+		<link rel="stylesheet" type="text/css" href="css/style.css">
+		<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+		
+	    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		
+		<script type="text/javascript" src="lib/jquery-3.5.1.slim.min.js"></script>
+		<script type="text/javascript" src="lib/popper.min.js"></script>
+		<script type="text/javascript" src="lib/bootstrap.min.js"></script>
+				
+		<script>
+			var reload = (sessionStorage.getItem("data")==null || sessionStorage.getItem("data")=="null" ? false : true);
+			// console.log("data: " + sessionStorage.getItem("data"));
+			var _actionMap = {};
+		    var _orig = (reload ? JSON.parse(sessionStorage.getItem("orig")) : null );
+		    var _data = (reload ? JSON.parse(sessionStorage.getItem("data")) : null );
+		    var _model = (reload ? JSON.parse(sessionStorage.getItem("model")) : null );
+		    var _dirty = (reload ? JSON.parse(sessionStorage.getItem("dirty")) : false );
+		    var _clipboard = (reload ? JSON.parse(sessionStorage.getItem("clipboard")) : null );
+		    var _history = [];
+		    var _future = [];
+		    var _selection = (reload && sessionStorage.getItem("selection")!="undefined" ? JSON.parse(sessionStorage.getItem("selection")) : null );
+		    var _folderSelection = (reload && sessionStorage.getItem("folderSelection")!="undefined" ? JSON.parse(sessionStorage.getItem("folderSelection")) : null );
+		    var _old_selection_id = (reload ? Number(sessionStorage.getItem("oldSelectionId")) : null );
+		    var _next_id = (reload ? Number(sessionStorage.getItem("nextId")) : -1 );
+		    var _expandeNode = (reload && sessionStorage.getItem("expandeNode")!="undefined" ? JSON.parse(sessionStorage.getItem("expandeNode")) : {} );
+		    var _editor = "Attributes";
+		    var documentMap = (reload && sessionStorage.getItem("documentMap")!="undefined" ? JSON.parse(sessionStorage.getItem("documentMap")) : {} );
+		    var _appName = "-";
+		    
+		</script>
+
+		<script type="text/javascript" src="js/datamodel.js"></script>
+		<script type="text/javascript" src="js/dialog.js"></script>
+		<script type="text/javascript" src="js/dependency.js"></script>
+		<script type="text/javascript" src="js/validation.js"></script>
+		<script type="text/javascript" src="js/variable.js"></script>
+		<script type="text/javascript" src="js/action/openDocument.js"></script>
+		<script type="text/javascript" src="js/action/collapseNavigation.js"></script>
+		<script type="text/javascript" src="js/action/newRootElement.js"></script>
+		<script type="text/javascript" src="js/action/newElement.js"></script>
+		<script type="text/javascript" src="js/action/save.js"></script>
+		<script type="text/javascript" src="js/action/deleteElement.js"></script>
+		<script type="text/javascript" src="js/action/undoRedo.js"></script>
+		<script type="text/javascript" src="js/action/cut.js"></script>
+		<script type="text/javascript" src="js/action/copy.js"></script>
+		<script type="text/javascript" src="js/action/paste.js"></script>
+		<script type="text/javascript" src="js/action/clear.js"></script>
+		<script type="text/javascript" src="js/action/validate.js"></script>
+		<script type="text/javascript" src="js/action/compare.js"></script>
+		<script type="text/javascript" src="js/action/journal.js"></script>
+		<script type="text/javascript" src="js/action/dump.js"></script>
+		<script type="text/javascript" src="js/action/logout.js"></script>
+		<script type="text/javascript" src="js/action/about.js"></script>
+		<script type="text/javascript" src="js/action/broadcast.js"></script>
+		<script type="text/javascript" src="js/action/genericAction.js"></script>
+		<script type="text/javascript" src="js/toolbar.js"></script>
+		<script type="text/javascript" src="js/operation/SetAttributeValueOperation.js"></script>
+		<script type="text/javascript" src="js/operation/AddChildOperation.js"></script>
+		<script type="text/javascript" src="js/operation/RemoveChildOperation.js"></script>
+		<script type="text/javascript" src="js/websocket.js"></script>
+		<script type="text/javascript" src="js/inputfields.js"></script>
+		<script type="text/javascript" src="js/inputfieldsTable.js"></script>
+		<script type="text/javascript" src="js/messageHandler.js"></script>
+		<script type="text/javascript" src="js/navigation.js"></script>
+		<script type="text/javascript" src="js/content.js"></script>
+		
+	    <script type="text/javascript">
+	    
+	    // this is important to assure correct output from JSON.stringify!
+	    delete Array.prototype.toJSON
+	    
+		// document.observe("dom:loaded", function() {
+		$( document ).ready(function() {
+		    if (!window.WebSocket) {
+	    	    alert("FATAL: WebSocket not natively supported. This demo will not work!");
+	    	}
+ 			initWS();
+		});
+		window.onbeforeunload = function (evt) {
+			sessionStorage.setItem("data", JSON.stringify(_data));
+			sessionStorage.setItem("clipboard", JSON.stringify(_clipboard));
+			sessionStorage.setItem("orig", JSON.stringify(_orig));
+			sessionStorage.setItem("model", JSON.stringify(_model));
+			sessionStorage.setItem("dirty", JSON.stringify(_dirty));
+			sessionStorage.setItem("selection", JSON.stringify(_selection));
+			sessionStorage.setItem("folderSelection", JSON.stringify(_folderSelection));
+			sessionStorage.setItem("oldSelectionId", _old_selection_id);
+			sessionStorage.setItem("nextId", _next_id);
+			sessionStorage.setItem("expandeNode", JSON.stringify(_expandeNode));
+			sessionStorage.setItem("documentMap", JSON.stringify(documentMap));
+		}
+	    </script>
+	</head>
+	<body>
+	
+		<div class="container-fluid">
+		
+			<nav class="navbar navbar-expand-xl navbar-dark bg-dark">
+			  <a class="navbar-brand" href="#" id="appName"></a>
+			  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+			    <span class="navbar-toggler-icon"></span>
+			  </button>
+			  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+			    <div id="toolbar" class="navbar-nav"></div>
+			  </div>
+			</nav>
+			
+			<div>
+				&nbsp;
+			</div>
+				
+			<div class="row mb-3 navAndContent">
+		    	<div class="col-md-3 themed-grid-col">
+		    		<!-- NAVIGATION -->
+		    		<div id="navigation">
+					</div>
+		    	</div>
+		    	<div class="col-md-9 themed-grid-col content">
+		    		<!-- CONTENT -->
+		    		<div id="content" style="padding:10px"></div>
+		    	</div>
+			</div>
+		
+		</div>
+		<div id="info" class="modal-dialog"></div>
+		<div id="comparison" class="modal-dialog modal-lg overflow-auto"></div>
+	</body>
+</html>

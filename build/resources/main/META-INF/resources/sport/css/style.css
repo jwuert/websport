@@ -1,0 +1,168 @@
+html {
+	height:100%;
+}
+#info {
+	position:absolute;
+	display:none;
+	width:480px;
+	/* height:300px; */
+	top: 50%;
+	left: 50%;
+	margin-top: -210px;
+	margin-left: -180px;
+}
+
+#comparison {
+	position:absolute;
+	display:none;
+	width:1000px;
+	height:520px;
+	top: 50%;
+	left: 50%;
+	margin-top: -210px;
+	margin-left: -440px;
+}
+
+.navAndContent {
+	/*  width:100%; */
+	height:calc(100% - 86px); /* 56 is the hight of the header (+20 for the space)! */
+}
+.content {
+	width:95%;
+	height:calc(100% - 86px); /* 56 is the hight of the header! */
+	/* float:left; */
+	overflow-y:scroll;
+} 
+
+.theError {
+	font: 10px helvetica;
+	color: red;
+/* 	padding:0;
+	spacing:0;
+	margin:0;
+ */	margin-right:2px;
+	padding-bottom:2px;
+}
+
+
+
+.tablerow {
+	vertical-align: top;
+	width: 100%;
+}
+
+.theLabel {
+	/*text-align:right;
+	font: 10px helvetica;
+	*/
+	font-style: italic;
+	padding:0;
+	spacing:0;
+	margin:0;
+	margin-right:2px;
+	padding-bottom:2px;
+}
+
+.validField {
+	/*background-color: #fff;
+	//color: #000;
+	//font: 10px helvetica;
+	*/
+	width: 100%;
+	padding-left:10px;
+	padding-right:10px;
+	padding-top:3px;
+	padding-bottom:3px;
+}
+
+.tableEditor {
+	width: 100%;
+	border: 1px solid black;
+	
+}
+.tableEditor tr th {
+	font-size: 12px;
+	font-weight:bold;
+	border: 1px solid black;
+	background-color: #fa5;
+	text-align: center;
+	padding: 2px;
+}
+
+.tableEditor tr td {
+	font-size: 12px;
+	border: 1px solid gray;
+	padding: 2px;
+	background-color: #ddd;
+}
+
+.tableField {
+	height: 24px;
+	width:100%;
+}
+
+
+
+
+/* Navigation */
+
+.navSelected {
+	color: #0099ff;
+}
+
+.navUnselected {
+	color:#000099;
+}
+
+/* Remove default bullets */
+ul, #navUL {
+  list-style-type: none;
+  padding-inline-start: 20px;
+}
+
+/* Remove margins and padding from the parent ul */
+#navUL {
+  margin: 0;
+  padding: 0;
+}
+
+/* Style the caret/arrow */
+.caretEmpty {
+  cursor: pointer;
+  user-select: none; /* Prevent text selection */
+}
+/* Create the caret/arrow with a unicode, and style it */
+.caretEmpty::before {
+  content: "\25CB";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.caret {
+  cursor: pointer;
+  user-select: none; /* Prevent text selection */
+}
+
+/* Create the caret/arrow with a unicode, and style it */
+.caret::before {
+  content: "\25B7";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+/* Rotate the caret/arrow icon when clicked on (using JavaScript) */
+.caret-down::before {
+  transform: rotate(90deg);
+}
+
+/* Hide the nested list */
+.nested {
+  display: none;
+}
+
+/* Show the nested list when the user clicks on the caret/arrow (with JavaScript) */
+.active {
+  display: block;
+}

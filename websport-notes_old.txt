@@ -1,0 +1,53 @@
+Deployment assembly:
+	source			deploy path
+	/src/main/webapp	/
+
+Project Facets:
+	Dynamic Web Module 3.1	"Java 1.7 or newer"	Runtimes: TomEE8
+	Java	1.8
+	JavaScript 1.0
+	
+Project Natures:
+JavaEFMNature Properties
+Web Properties
+Eclipse Facet Project Properties
+Java
+JavaScript
+
+Server:
+Tomcat v8.5
+---------------------------------
+
+project id in:
+websport
+- websocket.js (url)
+- resources.xml
+
+
+Tomcat Server: Open Launch Configuration
+
+-Dcatalina.base="/data/home/wuerthne/Projects/.metadata/.plugins/org.eclipse.wst.server.core/tmp1" -Dcatalina.home="/home/wuerthne/Software/apache-tomee-plus-8.0.2" -Dwtp.deploy="/data/home/wuerthne/Projects/.metadata/.plugins/org.eclipse.wst.server.core/tmp1/wtpwebapps" -Djava.endorsed.dirs="/home/wuerthne/Software/apache-tomee-plus-8.0.2/endorsed" --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.rmi/sun.rmi.transport=ALL-UNNAMED -javaagent:"/home/wuerthne/Software/apache-tomee-plus-8.0.2/lib/openejb-javaagent.jar"
+
+
+ create table USER ( ID BIGINT(20), USERNAME VARCHAR(255) NOT NULL, PASSWORD VARCHAR(255) NOT NULL, FNAME VARCHAR(255) default NULL, LNAME VARCHAR(255) default NULL, EMAIL VARCHAR(255), PRIMARY KEY(USERNAME));
+
+
+GENERIC_ELEMENT {INSERT INTO GENERIC_ELEMENT (ID, AC, CREATED, CREATED_BY, DELETED, GRP, INCLIPBOARD, MODIFIED_BY, ORDER, PARENT_ID, TYPE, MODIFIED) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)} [code=-5501, state=42501]
+
+create table GENERIC_ELEMENT (
+ ID  BIGINT(20),
+ PARENT_ID BIGINT(20),
+ TYPE  VARCHAR(40),
+ DELETED INT,
+ INCLIPBOARD INT,
+ AC  INT,
+ GRP  INT,
+ CREATED TIMESTAMP,
+ CREATED_BY VARCHAR(100),
+ MODIFIED TIMESTAMP,
+ MODIFIED_BY VARCHAR(100)
+);
+
+
+INSERT INTO GENERIC_ELEMENT (ID, AC, CREATED, CREATED_BY, DELETED, GRP, INCLIPBOARD, MODIFIED_BY, PARENT_ID, TYPE, MODIFIED) VALUES (12, 0, now, 'xy', 0, 0, 0, 'xy', 12, 'foo', now);
+

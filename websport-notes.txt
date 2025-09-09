@@ -1,0 +1,19 @@
+New approach:
+	Running tomee separately (not in eclipse)
+
+only dependency:
+	implementation group: 'org.apache.tomee', name: 'openejb-server', version: '8.0.16'
+
+must match what's in tomee:
+	apache-tomee-webprofile-8.0.16
+
+build path in eclipse: add javaee-api-8.0-6-tomcat.jar
+
+if web.xml of webapp contains ServletAdapter <servlet-class>com.sun.jersey.server.impl.container.servlet.ServletAdaptor</servlet-class>
+then, add
+	jersey-bundle-1.19.4.jar
+	jersey-core-1.19.4.jar
+to lib folder
+
+(seems to be required, although here, we use websockets...)
+
