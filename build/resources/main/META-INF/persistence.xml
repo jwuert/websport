@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0"
+	xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="sportpu" transaction-type="JTA">
+		<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+		<properties>
+			<property name="openjpa.RuntimeUnenhancedClasses" value="unsupported" />
+			<property name="openjpa.DynamicEnhancementAgent" value="false" />
+			
+			<property name="openjpa.jdbc.SynchronizeMappings" value="buildSchema(ForeignKeys=true)"/>
+			
+			<property name="openjpa.ConnectionFactoryProperties"
+				value="PrettyPrint=true, PrettyPrintLineLength=72, PrintParameters=true, MaxActive=10, MaxIdle=5, MinIdle=2, MaxWait=60000" />
+			
+			<property name="javax.persistence.schema-generation.database.action" value="create" />
+			<!-- property name="openjpa.jdbc.DBDictionary" value="derby(NextSequenceQuery=VALUES NEXT VALUE FOR {0})"/ -->
+			<!-- 
+			<property name="openjpa.Log" value="File=stdout, SQL=TRACE" />
+			 -->
+			<property name="openjpa.Log" value="File=stdout, SQL=ERROR" />
+			<property name="openjpa.ConnectionFactoryProperties" value="printParameters=true"/>
+			
+		</properties>
+	</persistence-unit>
+</persistence>
