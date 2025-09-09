@@ -1,6 +1,0 @@
-Manifest-Version: 1.0
-Implementation-Title: WebSport
-Implementation-Version: 1.0.0-SNAPSHOT
-Implementation-Vendor: Jan Wuerthner
-License: GNU LGPL v3
-
