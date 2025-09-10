@@ -1,7 +1,6 @@
 plugins {
     id 'java'
     id 'jacoco-report-aggregation'
-//    id 'com.github.spotbugs' version '4.8.0' apply true
     id 'maven-publish'
 }
 
@@ -42,7 +41,7 @@ publishing {
     repositories {
         maven {
             name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/jwuert/desktopsport")
+            url = uri("https://maven.pkg.github.com/jwuert/websport")
 
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
