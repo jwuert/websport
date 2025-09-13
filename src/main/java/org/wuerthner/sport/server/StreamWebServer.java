@@ -67,14 +67,20 @@ public class StreamWebServer {
 		logger.info("Server.onOpen(), sessionId=" + (session != null ? session.getId() : "(null session)"));
 		if (session != null) {
 			sessionList.add(session);
+            Map<String,String> userMap = dao.getUserMap();
+            JsonObjectBuilder jsonUserMap = Json.createObjectBuilder();
+            for (Map.Entry<String,String> entry : userMap.entrySet()) {
+                jsonUserMap.add(entry.getKey(), entry.getValue());
+            }
 			// send data model:
 			JsonObjectBuilder jsonModel = Json.createObjectBuilder();
 			jsonModel.add("command", "setModel");
 			jsonModel.add("data", SpeedyJson.createModel(factory));
 			jsonModel.add("appName", factory.getAppName());
+            jsonModel.add("userMap", jsonUserMap.build());
 			sendMessage(session, jsonModel.build());
-			
-			sendDocumentList(session);
+
+            sendDocumentList(session);
 			sendActionList(session);
 			
 			// send checks:
@@ -209,8 +215,13 @@ public class StreamWebServer {
 						throw new RuntimeException("### Session not in sessionList!");
 					int count = 1;
 					for (Session s : sessionList) {
-						logger.info("+++ Session: " + count++ + " - " + session);
+						logger.info("+++ Session: " + count++ + " - " + session + ", " + session.getUserPrincipal().getName());
 						s.getBasicRemote().sendText(message.toString());
+                        // send userId
+                        JsonObjectBuilder jsonModel = Json.createObjectBuilder();
+                        jsonModel.add("command", "setUserId");
+                        jsonModel.add("userId", s.getUserPrincipal().getName());
+                        s.getBasicRemote().sendText(jsonModel.build().toString());
 					}
 				} catch (Exception e) {
 					logger.error(e);
