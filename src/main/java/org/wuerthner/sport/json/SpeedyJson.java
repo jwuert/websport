@@ -39,7 +39,9 @@ public class SpeedyJson {
 		JsonObjectBuilder jsonAttributes = getJsonAttributes(element, false, false);
 		json.add("attributes", jsonAttributes);
 		JsonArrayBuilder childArray = Json.createArrayBuilder();
-		for (ModelElement child : element.getChildren()) {
+        List<ModelElement> childList = element.getChildren();
+        childList.sort((el1, el2) -> el1.getId().compareTo(el2.getId()));
+		for (ModelElement child : childList) {
 			JsonObject jsonChild = create(child);
 			childArray.add(jsonChild);
 		}
@@ -122,7 +124,7 @@ public class SpeedyJson {
 				builder.add(key, create((ModelElement) value));
 			} else if (value instanceof List) {
 				List<?> rowList = (List<?>) value;
-				JsonArrayBuilder rowArray = Json.createArrayBuilder();
+                JsonArrayBuilder rowArray = Json.createArrayBuilder();
 				for (Object row : rowList) {
 					if (row instanceof List) {
 						List<?> itemList = (List<?>) row;

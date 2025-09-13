@@ -469,4 +469,22 @@ public class GenericDao {
 		entityManager.persist(attribute);
 	}
 
+    public String getUserName(String username) {
+        List<String> list = entityManager.createNativeQuery("select concat(concat(u.fname, ' '), u.lname) from USER u where u.username=?1")
+                .setParameter(1, username)
+                .getResultList();
+        String result = (list.isEmpty() ? "unknown username" : list.size()>1 ? "ambiguous username" : list.get(0));
+        return result;
+    }
+
+    public Map<String,String> getUserMap() {
+        List<String> list = entityManager.createNativeQuery("select concat(concat(concat(concat(u.username, '|'), u.fname), ' '), u.lname) from USER u")
+                .getResultList();
+        Map<String,String> userMap = new HashMap<>();
+        for (String entry : list) {
+            String[] pair = entry.split("\\|");
+            userMap.put(pair[0], pair[1]);
+        }
+        return userMap;
+    }
 }

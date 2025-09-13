@@ -73,6 +73,7 @@ function invokeAction(id) {
 
 function requestElement(parentId, id) {
 	if (ws) {
+	    console.log("pid: " + parentId + ", id: " + id);
 		ws.send("{\"command\":\"requestElement\", \"parentId\":"+parentId+", \"id\":"+id+"}");
 	}
 }
@@ -83,7 +84,8 @@ function log(text) {
 
 function initWS() {
 	console.log("Running project: " + getProjectId());
-	var wsUri = "ws://" + window.location.hostname + ":" + window.location.port + "/" + getProjectId() + "/socket";
+	// var wsUri = "ws://" + window.location.hostname + ":" + window.location.port + "/" + getProjectId() + "/socket";
+	const wsUri = (window.location.protocol === "https:" ? "wss://" : "ws://") + window.location.hostname + ":" + window.location.port + "/" + getProjectId() + "/socket";
 	log("connecting to: " + wsUri);
 	ws = new WebSocket(wsUri);
 	// ws = new WebSocket("ws://localhost:8887");
