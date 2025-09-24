@@ -2,6 +2,7 @@ package org.wuerthner.sport.server;
 
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -16,12 +17,10 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonReader;
 import jakarta.json.stream.JsonParsingException;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnError;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
+import jakarta.websocket.*;
+import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpoint;
+import jakarta.websocket.server.ServerEndpointConfig;
 import jakarta.xml.bind.DatatypeConverter;
 
 import org.wuerthner.sport.action.OpenDocumentWebAction;
@@ -40,7 +39,7 @@ import org.wuerthner.sport.util.Logger;
 
 // @ApplicationScoped
 @Stateless
-@ServerEndpoint(value = "/socket")
+@ServerEndpoint(value = "/socket", configurator=QueryConfigurator.class)
 public class StreamWebServer {
 	private final static Logger logger = Logger.getLogger(StreamWebServer.class);
 	
@@ -63,26 +62,39 @@ public class StreamWebServer {
 	static List<Session> sessionList = new ArrayList<>();
 	
 	@OnOpen
-	public void onOpen(Session session) throws Exception {
+	public void onOpen(Session session, EndpointConfig config) throws Exception {
 		logger.info("Server.onOpen(), sessionId=" + (session != null ? session.getId() : "(null session)"));
+        System.out.println("################################## WEBSOCKET OPEN #####################################");
 		if (session != null) {
 			sessionList.add(session);
-            Map<String,String> userMap = dao.getUserMap();
-            JsonObjectBuilder jsonUserMap = Json.createObjectBuilder();
-            for (Map.Entry<String,String> entry : userMap.entrySet()) {
-                jsonUserMap.add(entry.getKey(), entry.getValue());
-            }
-			// send data model:
-			JsonObjectBuilder jsonModel = Json.createObjectBuilder();
-			jsonModel.add("command", "setModel");
-			jsonModel.add("data", SpeedyJson.createModel(factory));
-			jsonModel.add("appName", factory.getAppName());
-            jsonModel.add("userMap", jsonUserMap.build());
-			sendMessage(session, jsonModel.build());
+            String userId = (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
+            System.out.println("User ID: " + userId + " logged in via: " + (session.getUserPrincipal()==null?"UUID":"Authentication"));
 
-            sendDocumentList(session);
-			sendActionList(session);
-			
+            Map<String,String> userMap = dao.getUserMap();
+            if (userMap.get(userId)==null) {
+                JsonObjectBuilder jsonModel = Json.createObjectBuilder();
+                jsonModel.add("command", "info");
+                jsonModel.add("header", "info");
+                jsonModel.add("message", "User '" + ("null".equals(session.getUserProperties().get("user"))?"?":session.getUserProperties().get("user")) + "' not registered!");
+                sendMessage(session, jsonModel.build());
+                session.close();
+            } else {
+                JsonObjectBuilder jsonUserMap = Json.createObjectBuilder();
+                for (Map.Entry<String, String> entry : userMap.entrySet()) {
+                    jsonUserMap.add(entry.getKey(), entry.getValue());
+                }
+
+                // send data model:
+                JsonObjectBuilder jsonModel = Json.createObjectBuilder();
+                jsonModel.add("command", "setModel");
+                jsonModel.add("data", SpeedyJson.createModel(factory));
+                jsonModel.add("appName", factory.getAppName());
+                jsonModel.add("userMap", jsonUserMap.build());
+                sendMessage(session, jsonModel.build());
+
+                sendDocumentList(session);
+                sendActionList(session);
+            }
 			// send checks:
 			// JsonObjectBuilder jsonC = Json.createObjectBuilder();
 			// jsonC.add("command", "setChecks");
@@ -215,12 +227,13 @@ public class StreamWebServer {
 						throw new RuntimeException("### Session not in sessionList!");
 					int count = 1;
 					for (Session s : sessionList) {
-						logger.info("+++ Session: " + count++ + " - " + session + ", " + session.getUserPrincipal().getName());
+						logger.info("+++ Session: " + count++ + " - " + session + ", " +
+                                (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user"))));
 						s.getBasicRemote().sendText(message.toString());
                         // send userId
                         JsonObjectBuilder jsonModel = Json.createObjectBuilder();
                         jsonModel.add("command", "setUserId");
-                        jsonModel.add("userId", s.getUserPrincipal().getName());
+                        jsonModel.add("userId", (s.getUserPrincipal()!=null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID(""+s.getUserProperties().get("user"))));
                         s.getBasicRemote().sendText(jsonModel.build().toString());
 					}
 				} catch (Exception e) {
@@ -229,4 +242,5 @@ public class StreamWebServer {
 			}
 		}
 	}
+
 }
