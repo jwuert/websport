@@ -487,4 +487,12 @@ public class GenericDao {
         }
         return userMap;
     }
+
+    public String getUserIdByUUID(String uuid) {
+        List<String> list = entityManager.createNativeQuery("select u.username from USER u where u.id=?1")
+                .setParameter(1, uuid)
+                .getResultList();
+        String result = (list.isEmpty() ? "unknown id" : list.size()>1 ? "ambiguous id" : list.get(0));
+        return result;
+    }
 }
