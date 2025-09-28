@@ -17,6 +17,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonReader;
 import jakarta.json.stream.JsonParsingException;
+import jakarta.servlet.http.HttpSession;
 import jakarta.websocket.*;
 import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpoint;
@@ -65,11 +66,19 @@ public class StreamWebServer {
 	public void onOpen(Session session, EndpointConfig config) throws Exception {
 		logger.info("Server.onOpen(), sessionId=" + (session != null ? session.getId() : "(null session)"));
         System.out.println("################################## WEBSOCKET OPEN #####################################");
+        HttpSession httpSession = (HttpSession) config.getUserProperties().get("httpSession");
+        Boolean justLoggedIn = false;
+        if (httpSession!=null) {
+            justLoggedIn = (Boolean) httpSession.getAttribute("justLoggedIn");
+            if (Boolean.TRUE.equals(justLoggedIn)) {
+                httpSession.setAttribute("justLoggedIn", Boolean.FALSE);
+            }
+        }
 		if (session != null) {
 			sessionList.add(session);
             String userId = (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
             System.out.println("User ID: " + userId + " logged in via: " + (session.getUserPrincipal()==null?"UUID":"Authentication"));
-
+            System.out.println("Just logged in: " + justLoggedIn);
             Map<String,String> userMap = dao.getUserMap();
             if (userMap.get(userId)==null) {
                 JsonObjectBuilder jsonModel = Json.createObjectBuilder();
@@ -90,6 +99,7 @@ public class StreamWebServer {
                 jsonModel.add("data", SpeedyJson.createModel(factory));
                 jsonModel.add("appName", factory.getAppName());
                 jsonModel.add("userMap", jsonUserMap.build());
+                jsonModel.add("newSession", justLoggedIn);
                 sendMessage(session, jsonModel.build());
 
                 sendDocumentList(session);
