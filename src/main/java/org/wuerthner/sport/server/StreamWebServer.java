@@ -69,7 +69,9 @@ public class StreamWebServer {
         HttpSession httpSession = (HttpSession) config.getUserProperties().get("httpSession");
         Boolean justLoggedIn = false;
         if (httpSession!=null) {
-            justLoggedIn = (Boolean) httpSession.getAttribute("justLoggedIn");
+            if (httpSession.getAttribute("justLoggedIn")!=null) {
+                justLoggedIn = (Boolean) httpSession.getAttribute("justLoggedIn");
+            }
             if (Boolean.TRUE.equals(justLoggedIn)) {
                 httpSession.setAttribute("justLoggedIn", Boolean.FALSE);
             }
