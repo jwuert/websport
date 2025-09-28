@@ -19,6 +19,9 @@ function handleMessage(ws, data) {
 		_model = jo["data"];
 		_appName = jo["appName"];
 		document.getElementById("appName").innerHTML = _appName;
+		var newSession = jo["newSession"]
+		console.log("New Session: " + newSession);
+		if (newSession) { _data = null; }
 // 	} else if (command==="replaceId") {
 		// IDs need to be replaced (not in the data, but) in history and future!
 //		clearContent();
@@ -35,9 +38,11 @@ function handleMessage(ws, data) {
 //		}
 	} else if (command==="setDocumentList") {
 		var documentReferenceMap = jo["data"];
+		console.log(documentReferenceMap);
 		for (var name in documentReferenceMap) {
 			var id = documentReferenceMap[name];
 			documentMap[id] = name;
+			console.log("provide document: " + id + ", name: " + name);
 		}
 	} else if (command==="setActionList") {
 		var actionList = jo["actionList"];

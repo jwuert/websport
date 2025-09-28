@@ -54,16 +54,16 @@ public class GenericDao {
 	
 	public List<DocumentReference> getDocuments(String type) {
 		List<DocumentReference> docReferences;
-		try {
+		//try {
 			@SuppressWarnings("unchecked")
 			List<Object[]> list = entityManager.createQuery(DOCUMENT_TYPE_QUERY3).setParameter("type", type).getResultList();
 			docReferences = list.stream().map(array -> new DocumentReference(array))
 					// TODO: .filter(docref -> (context == null ? true : accessService.hasReadAccess(this.getElement(docref.ID, context), context)))
 					.collect(Collectors.toList());
 			System.out.println("# of documents: " + docReferences.size());
-		} catch (Exception e) {
-			docReferences = new ArrayList<>();
-		}
+		//} catch (Exception e) {
+		//	docReferences = new ArrayList<>();
+		//}
 		return docReferences;
 	}
 	

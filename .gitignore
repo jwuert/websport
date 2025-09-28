@@ -4,4 +4,4 @@ bin/
 .idea/
 websport-notes.txt
 websport-notes_old.txt
-
+src/main/resources/META-INF/persistence.xml_
