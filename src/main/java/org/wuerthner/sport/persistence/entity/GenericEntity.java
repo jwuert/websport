@@ -51,9 +51,12 @@ public class GenericEntity {
 	
 	@Column(name = "TYPE")
 	private String type;
-	
-	@Version
-	@Temporal(TemporalType.TIMESTAMP)
+
+    @Version
+    @Column(name = "VERSION")
+    private long version;
+
+    @Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "MODIFIED")
 	private Timestamp modified;
 	

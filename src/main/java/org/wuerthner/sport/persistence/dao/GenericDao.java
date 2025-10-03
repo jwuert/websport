@@ -13,10 +13,7 @@ import java.util.stream.Collectors;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Query;
+import jakarta.persistence.*;
 
 import org.wuerthner.sport.api.ModelElement;
 import org.wuerthner.sport.api.ModelElementFactory;
@@ -77,7 +74,7 @@ public class GenericDao {
 		}
 		return create2(entity, -1);
 	}
-	
+
 	public Long persistTree(ModelElement element) {
 		Long topLevelId = -1L;
 		synchronized (element) {
@@ -88,7 +85,7 @@ public class GenericDao {
 		}
 		return topLevelId;
 	}
-	
+
 	public Long persistElement(ModelElement element) {
 		Long newId = -1L;
 		if (true) { // TODO: access control: if (accessService.hasWriteAccess(element, context)) {
@@ -179,7 +176,12 @@ public class GenericDao {
 	}
 	
 	public void flush() {
-		entityManager.flush();
+        try {
+		    entityManager.flush();
+        } catch (OptimisticLockException e) {
+            System.err.println("Concurrent Modification on flush!");
+            throw new ConcurrencyException();
+        }
 	}
 	
 	public class DocumentReference {
@@ -270,7 +272,6 @@ public class GenericDao {
 	}
 	
 	private void updateEntity(GenericEntity target, ModelElement source) {
-		checkForConcurrentModification(target, source);
 		long userId = 4711; // TODO: context.getUserId();
 		// User user = entityManager.find(User.class, userId);
 		// entity.setModifiedBy(user.getId());
@@ -295,18 +296,6 @@ public class GenericDao {
 		target.setGroup(0); // source.getGroup());
 		target.setAccess(0); // source.getAccess());
 		// target.setOrder(0); // source.getOrder());
-	}
-	
-	private void checkForConcurrentModification(GenericEntity entity, ModelElement element) {
-		Date readTime = element.getModified();
-		Date lastWriteTime = new Date(entity.getModified().getTime());
-		if (readTime == null) {
-			throw new RuntimeException("Missing 'modified' value in instance of " + ModelElement.class.getName());
-		}
-		if (!lastWriteTime.equals(readTime)) {
-			throw new RuntimeException(
-					"Instance of " + ModelElement.class.getName() + " (id " + element.getId() + ") was concurrently modified (worker id " + entity.getModifiedBy() + ") [" + lastWriteTime + ":" + readTime + "]");
-		}
 	}
 	
 	private List<AttributeEntity> updateElementEntityList(GenericEntity elementEntity, Map<String, String> origMap, ModelElement source, long userId) {
@@ -357,8 +346,10 @@ public class GenericDao {
 			attributeEntity.setKey(entry.getKey());
 			attributeEntity.setValue(entry.getValue());
 			// elementEntity.setCreatedBy(user.getId());
-			
-			attributeEntity.setCreated(new Date());
+
+            Date date = new Date();
+			attributeEntity.setCreated(date);
+            attributeEntity.setModified(date);
 			// elementEntity.setModifiedBy(user.getId());
 			attributeEntityList.add(attributeEntity);
 			attributeEntity.setParent(elementEntity);
@@ -386,10 +377,12 @@ public class GenericDao {
 		
 		genericElement.setModified(entity.getModified());
 		// fill data fields after persisting, because this might create child entities
-		
+
+        Date date = new Date();
 		entity.setCreatedBy(userId);
-		entity.setCreated(new Date());
+		entity.setCreated(date);
 		entity.setModifiedBy(userId);
+        entity.setModified(date);
 		entity.setGroup(0);
 		// entity.setAccess(Access.DEFAULT_ACCESS);
 		copyDataFieldsToEntity(entity, genericElement, userId);

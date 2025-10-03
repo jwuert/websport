@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.ejb.EJBException;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.json.Json;
@@ -34,6 +35,7 @@ import org.wuerthner.sport.core.ModelState;
 import org.wuerthner.sport.core.XMLReader;
 import org.wuerthner.sport.json.JsonToModel;
 import org.wuerthner.sport.json.SpeedyJson;
+import org.wuerthner.sport.persistence.dao.ConcurrencyException;
 import org.wuerthner.sport.persistence.dao.GenericDao;
 import org.wuerthner.sport.persistence.dao.GenericDao.DocumentReference;
 import org.wuerthner.sport.util.Logger;
@@ -87,7 +89,7 @@ public class StreamWebServer {
                 jsonModel.add("command", "info");
                 jsonModel.add("header", "info");
                 jsonModel.add("message", "User '" + ("null".equals(session.getUserProperties().get("user"))?"?":session.getUserProperties().get("user")) + "' not registered!");
-                sendMessage(session, jsonModel.build());
+                session.getBasicRemote().sendText(jsonModel.build().toString());
                 session.close();
             } else {
                 JsonObjectBuilder jsonUserMap = Json.createObjectBuilder();
@@ -186,6 +188,7 @@ public class StreamWebServer {
 					String command = jsonObject.getString("command");
 					logger.info("Server.onMessage(), command: " + command);
 					Optional<Action> actionOptional = actionProvider.getAction(command);
+                    String error = null;
 					if (actionOptional.isPresent()) {
 						ModelElement rootElement = jsonObject.containsKey("rootId") ? dao.getElement(Long.valueOf(jsonObject.getInt("rootId"))) : null;
 						ModelElement selectedElement = jsonObject.containsKey("selectedId") && Long.valueOf(jsonObject.getInt("selectedId")) >= 0 ? dao.getElement(Long.valueOf(jsonObject.getInt("selectedId"))) : null;
@@ -195,8 +198,8 @@ public class StreamWebServer {
 							long id = data.getInt("id");
 							auxElement = dao.getElement(id);
 							Map<Integer, ModelElement> idMap = new HashMap<>();
-							jsonToModel.mergeTree(auxElement, data, idMap);
-							if (!command.equals("save")) {
+                            jsonToModel.mergeTree(auxElement, data, idMap);
+                            if (!command.equals("save")) {
 								for (Map.Entry<Integer, ModelElement> entry : idMap.entrySet()) {
 									// sets back the technical ID from the UI (negative numbers)
 									// the elements cannot be stored in the database now, but the validation links will work!
@@ -207,10 +210,22 @@ public class StreamWebServer {
 						Map<String, String> parameterMap = SpeedyJson.jsonToMap(jsonObject);
 						parameterMap.put(Model.REFERENCE_FILE, null);
 						System.out.println("root: " + rootElement);
-						Map<String, Object> resultMap = actionOptional.get().invoke(factory, new ModelState(rootElement, selectedElement, auxElement), parameterMap);
+                        Map<String, Object> resultMap = new HashMap<>();
+                        try {
+						    resultMap = actionOptional.get().invoke(factory, new ModelState(rootElement, selectedElement, auxElement), parameterMap);
+                        } catch (EJBException e) {
+                            error = "Bitte erneut versuchen!";
+                        }
 						System.out.println("ResultMap: " + resultMap);
 						JsonObject response = SpeedyJson.createCommandMessageFromMap(resultMap);
 						sendMessage(session, response);
+                        if (error!=null) {
+                            JsonObjectBuilder jsonModel = Json.createObjectBuilder();
+                            jsonModel.add("command", "info");
+                            jsonModel.add("header", "info");
+                            jsonModel.add("message", error);
+                            session.getBasicRemote().sendText(jsonModel.build().toString());
+                        }
 					} else {
 						logger.error("Server.onMessage(), no action found for '" + command + "'");
 					}
