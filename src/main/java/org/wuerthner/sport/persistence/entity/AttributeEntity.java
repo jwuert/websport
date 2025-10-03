@@ -43,7 +43,10 @@ public class AttributeEntity {
 	private String value;
 	
 	@Version
-	@Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "VERSION")
+    private long version;
+
+    @Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "MODIFIED")
 	private Timestamp modified;
 	
