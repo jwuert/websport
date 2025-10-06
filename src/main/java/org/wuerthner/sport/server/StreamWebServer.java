@@ -3,11 +3,8 @@ package org.wuerthner.sport.server;
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import jakarta.ejb.EJBException;
 import jakarta.ejb.Stateless;
@@ -67,7 +64,6 @@ public class StreamWebServer {
 	@OnOpen
 	public void onOpen(Session session, EndpointConfig config) throws Exception {
 		logger.info("Server.onOpen(), sessionId=" + (session != null ? session.getId() : "(null session)"));
-        System.out.println("################################## WEBSOCKET OPEN #####################################");
         HttpSession httpSession = (HttpSession) config.getUserProperties().get("httpSession");
         Boolean justLoggedIn = false;
         if (httpSession!=null) {
@@ -216,6 +212,7 @@ public class StreamWebServer {
                         } catch (EJBException e) {
                             error = "Bitte erneut versuchen!";
                         }
+                        resultMap.put("senderId", session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
 						System.out.println("ResultMap: " + resultMap);
 						JsonObject response = SpeedyJson.createCommandMessageFromMap(resultMap);
 						sendMessage(session, response);
@@ -229,6 +226,12 @@ public class StreamWebServer {
 					} else {
 						logger.error("Server.onMessage(), no action found for '" + command + "'");
 					}
+                    if (command.equals("logoutAll")) {
+                        logger.info("Closing all sessions!");
+                        for (Session s : List.copyOf(sessionList)) {
+                            s.close();
+                        }
+                    }
 				} catch (JsonParsingException e) {
 					logger.error(e);
 				}
@@ -253,7 +256,14 @@ public class StreamWebServer {
 					if (!sessionList.contains(session))
 						throw new RuntimeException("### Session not in sessionList!");
 					int count = 1;
-					for (Session s : sessionList) {
+                    //Set<String> userIdSet = sessionList.stream().map(s ->
+                    //        s.getUserPrincipal() != null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID("" + s.getUserProperties().get("user"))
+                    //).collect(Collectors.toSet());
+                    JsonArrayBuilder userIdSetJson = Json.createArrayBuilder();
+                    for (Session s : sessionList) {
+                        userIdSetJson.add( s.getUserPrincipal() != null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID("" + s.getUserProperties().get("user")) );
+                    }
+                    for (Session s : sessionList) {
 						logger.info("+++ Session: " + count++ + " - " + session + ", " +
                                 (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user"))));
 						s.getBasicRemote().sendText(message.toString());
@@ -261,6 +271,7 @@ public class StreamWebServer {
                         JsonObjectBuilder jsonModel = Json.createObjectBuilder();
                         jsonModel.add("command", "setUserId");
                         jsonModel.add("userId", (s.getUserPrincipal()!=null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID(""+s.getUserProperties().get("user"))));
+                        jsonModel.add("userIdSet", userIdSetJson.build());
                         s.getBasicRemote().sendText(jsonModel.build().toString());
 					}
 				} catch (Exception e) {

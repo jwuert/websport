@@ -51,6 +51,7 @@ function initializeToolBar(actionList) {
 			case "dump": _actionMap.dump = new DumpAction(); break;
 			case "journal": _actionMap.journal= new JournalAction(); break;
 			case "logout": _actionMap.logout = new LogoutAction(); break;
+			case "logoutAll": _actionMap.logoutAll = new LogoutAllAction(); break;
 			case "newRootElement": _actionMap.newRootElement = new NewRootElementAction(); break;
 			case "newElement": _actionMap.newElement= new NewElementAction(); break;
 			case "openDocument": _actionMap.openDocument = new OpenDocumentAction(); break;

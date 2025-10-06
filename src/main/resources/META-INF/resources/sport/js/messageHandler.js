@@ -10,11 +10,16 @@ function handleMessage(ws, data) {
 	console.log("command: " + command);
 	
 	if (command==="setData") {
-		_data = jo["data"];
-		_orig = JSON.parse(JSON.stringify(_data));
-		addParents(_data, _data["id"]);
-		createNavigation(_data);
-		selectElement(_data["id"], "Attributes");
+	    // this makes sure that only the user's own changes can cause an update, in order to avoid overwriting changes made in the browser
+	    if (jo["senderId"] === _userId) {
+            _data = jo["data"];
+            _orig = JSON.parse(JSON.stringify(_data));
+            addParents(_data, _data["id"]);
+            createNavigation(_data);
+            selectElement(_data["id"], "Attributes");
+		}
+	} else if (command==="setUserId") {
+        _userId = jo["userId"];
 	} else if (command==="setModel") {
 		_model = jo["data"];
 		_appName = jo["appName"];

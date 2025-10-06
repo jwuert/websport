@@ -31,6 +31,7 @@
 		    var _editor = "Attributes";
 		    var documentMap = (reload && sessionStorage.getItem("documentMap")!="undefined" ? JSON.parse(sessionStorage.getItem("documentMap")) : {} );
 		    var _appName = "-";
+            var _userId = (reload && sessionStorage.getItem("userId")!="undefined" ? sessionStorage.getItem("userId") : "");
 		    
 		</script>
 
@@ -54,7 +55,8 @@
 		<script type="text/javascript" src="js/action/compare.js"></script>
 		<script type="text/javascript" src="js/action/journal.js"></script>
 		<script type="text/javascript" src="js/action/dump.js"></script>
-		<script type="text/javascript" src="js/action/logout.js"></script>
+        <script type="text/javascript" src="js/action/logout.js"></script>
+        <script type="text/javascript" src="js/action/logoutAll.js"></script>
 		<script type="text/javascript" src="js/action/about.js"></script>
 		<script type="text/javascript" src="js/action/broadcast.js"></script>
 		<script type="text/javascript" src="js/action/genericAction.js"></script>
@@ -93,6 +95,7 @@
 			sessionStorage.setItem("nextId", _next_id);
 			sessionStorage.setItem("expandeNode", JSON.stringify(_expandeNode));
 			sessionStorage.setItem("documentMap", JSON.stringify(documentMap));
+			sessionStorage.setItem("userId", _userId);
 		}
 	    </script>
 	</head>
