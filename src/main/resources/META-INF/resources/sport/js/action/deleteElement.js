@@ -6,7 +6,7 @@ class DeleteElementAction {
 	}
 	
 	getLabel() {
-		return "Logout";
+		return "Delete";
 	}
 	
 	init() {
