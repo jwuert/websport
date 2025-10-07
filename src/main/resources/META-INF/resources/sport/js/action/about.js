@@ -14,7 +14,7 @@ class AboutAction {
 	}
 	
 	invoke(result) {
-		var message = "2024 by J. Würthner";
+		var message = "2025 by J. Würthner";
 		var parameterList = [{type:"message", label:message}];
 		if (_data) {
 			var msgs = fullValidation(_data);
@@ -30,7 +30,7 @@ class AboutAction {
 				parameterList.push({type:"message", label:diffList[i].info()});
 			}
 		}
-		parameterList.push({type:"message", label:"woah!"});
+
 		parameterList.push({type:"message", label:result});
 		dialog("about", "About", parameterList);
 	}
