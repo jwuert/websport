@@ -32,6 +32,7 @@
 		    var documentMap = (reload && sessionStorage.getItem("documentMap")!="undefined" ? JSON.parse(sessionStorage.getItem("documentMap")) : {} );
 		    var _appName = "-";
             var _userId = (reload && sessionStorage.getItem("userId")!="undefined" ? sessionStorage.getItem("userId") : "");
+            // var _maintenance = (reload && sessionStorage.getItem("maintenance")!="undefined" ? sessionStorage.getItem("maintenance") : "" );
 		    
 		</script>
 
@@ -96,6 +97,7 @@
 			sessionStorage.setItem("expandeNode", JSON.stringify(_expandeNode));
 			sessionStorage.setItem("documentMap", JSON.stringify(documentMap));
 			sessionStorage.setItem("userId", _userId);
+			// sessionStorage.setItem("maintenance", _maintenance);
 		}
 	    </script>
 	</head>

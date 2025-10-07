@@ -20,6 +20,18 @@ function handleMessage(ws, data) {
 		}
 	} else if (command==="setUserId") {
         _userId = jo["userId"];
+        //_maintenance = jo["maintenance"]
+        console.log("websport: userId = " + _userId);
+        //console.log("websport: maintenance: " + _maintenance);
+        //console.log(_maintenance);
+        //if (_maintenance!="" && _maintenance!=_userId) {
+        //    var header = "Wartungsarbeiten";
+        //    var message = "Das System wird gerade von " + _maintenance + " bearbeitet.";
+        //    var parameterList = [];
+        //    parameterList.push({type:"message", label:message});
+        //    dialog("Info", header, parameterList);
+        //    ws.close();
+        //}
 	} else if (command==="setModel") {
 		_model = jo["data"];
 		_appName = jo["appName"];

@@ -75,7 +75,6 @@ public class StreamWebServer {
             }
         }
 		if (session != null) {
-			sessionList.add(session);
             String userId = (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
             System.out.println("User ID: " + userId + " logged in via: " + (session.getUserPrincipal()==null?"UUID":"Authentication"));
             System.out.println("Just logged in: " + justLoggedIn);
@@ -84,38 +83,60 @@ public class StreamWebServer {
                 JsonObjectBuilder jsonModel = Json.createObjectBuilder();
                 jsonModel.add("command", "info");
                 jsonModel.add("header", "info");
-                jsonModel.add("message", "User '" + ("null".equals(session.getUserProperties().get("user"))?"?":session.getUserProperties().get("user")) + "' not registered!");
+                jsonModel.add("message", "User '" + ("null".equals(session.getUserProperties().get("user")) ? "?" : session.getUserProperties().get("user")) + "' not registered!");
                 session.getBasicRemote().sendText(jsonModel.build().toString());
                 session.close();
             } else {
-                JsonObjectBuilder jsonUserMap = Json.createObjectBuilder();
-                for (Map.Entry<String, String> entry : userMap.entrySet()) {
-                    jsonUserMap.add(entry.getKey(), entry.getValue());
+                if (session.getUserPrincipal() != null) {
+                    // editing mode - if there already is someone editing, close session!
+                    String maintenance = null;
+                    for (Session s : sessionList) {
+                        if (s.getUserPrincipal() != null) {
+                            maintenance = s.getUserPrincipal().getName();
+                        }
+                    }
+                    System.out.println("///// user: " + userId + ", maintenance: " + maintenance);
+                    if (maintenance != null && !maintenance.equals(userId)) {
+                        System.out.println("Session will be closed due to maintenance");
+                        JsonObjectBuilder jsonModel = Json.createObjectBuilder();
+                        jsonModel.add("command", "info");
+                        jsonModel.add("header", "Wartungsarbeiten");
+                        jsonModel.add("message", "Das System wird gerade von " + maintenance + " bearbeitet!");
+                        session.getBasicRemote().sendText(jsonModel.build().toString());
+                        session.close();
+                    }
                 }
+                if (session.isOpen()) {
+                    sessionList.add(session);
+                    JsonObjectBuilder jsonUserMap = Json.createObjectBuilder();
+                    for (Map.Entry<String, String> entry : userMap.entrySet()) {
+                        jsonUserMap.add(entry.getKey(), entry.getValue());
+                    }
 
-                // send data model:
-                JsonObjectBuilder jsonModel = Json.createObjectBuilder();
-                jsonModel.add("command", "setModel");
-                jsonModel.add("data", SpeedyJson.createModel(factory));
-                jsonModel.add("appName", factory.getAppName());
-                jsonModel.add("userMap", jsonUserMap.build());
-                jsonModel.add("newSession", justLoggedIn);
-                sendMessage(session, jsonModel.build());
+                    // send data model:
+                    JsonObjectBuilder jsonModel = Json.createObjectBuilder();
+                    jsonModel.add("command", "setModel");
+                    jsonModel.add("data", SpeedyJson.createModel(factory));
+                    jsonModel.add("appName", factory.getAppName());
+                    jsonModel.add("userMap", jsonUserMap.build());
+                    jsonModel.add("newSession", justLoggedIn);
+                    sendMessage(session, jsonModel.build());
 
-                sendDocumentList(session);
-                sendActionList(session);
+                    sendDocumentList(session);
+                    sendActionList(session);
+                    // send checks:
+                    // JsonObjectBuilder jsonC = Json.createObjectBuilder();
+                    // jsonC.add("command", "setChecks");
+                    // JsonObjectBuilder map = Json.createObjectBuilder();
+                    // String script = new Truth().getScript().replaceFirst("function [A-Za-z]+", "function ");
+                    // System.out.println(script);
+                    // map.add("getTruth", script);
+                    // script = new AttributeTruth().getScript().replaceFirst("function [A-Za-z]+", "function ");
+                    // map.add("getAttributeTruth", script);
+                    // jsonC.add("data", map.build());
+                    // sendMessage(session, jsonC.build());
+                }
             }
-			// send checks:
-			// JsonObjectBuilder jsonC = Json.createObjectBuilder();
-			// jsonC.add("command", "setChecks");
-			// JsonObjectBuilder map = Json.createObjectBuilder();
-			// String script = new Truth().getScript().replaceFirst("function [A-Za-z]+", "function ");
-			// System.out.println(script);
-			// map.add("getTruth", script);
-			// script = new AttributeTruth().getScript().replaceFirst("function [A-Za-z]+", "function ");
-			// map.add("getAttributeTruth", script);
-			// jsonC.add("data", map.build());
-			// sendMessage(session, jsonC.build());
 		}
 	}
 	
@@ -147,6 +168,9 @@ public class StreamWebServer {
 	@OnClose
 	public void onClose(Session session) throws Exception {
 		if (session != null) {
+//            JsonObjectBuilder jsonModel = Json.createObjectBuilder();
+//            jsonModel.add("command", "nocommand");
+//            sendMessage(session, jsonModel.build());
 			sessionList.remove(session);
 			logger.info("Server.onClose(), sessionId=" + (session != null ? session.getId() : "(null session)"));
 		}
@@ -259,19 +283,23 @@ public class StreamWebServer {
                     //Set<String> userIdSet = sessionList.stream().map(s ->
                     //        s.getUserPrincipal() != null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID("" + s.getUserProperties().get("user"))
                     //).collect(Collectors.toSet());
-                    JsonArrayBuilder userIdSetJson = Json.createArrayBuilder();
+
+
+//                    JsonObjectBuilder userMaintenanceMap = Json.createObjectBuilder();
+//                    for (Session s : sessionList) {
+//                        userMaintenanceMap.add( s.getUserPrincipal() != null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID("" + s.getUserProperties().get("user")),
+//                                s.getUserPrincipal() != null );
+//                    }
+                    String user = (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
+//                    JsonObject maintenance = userMaintenanceMap.build();
                     for (Session s : sessionList) {
-                        userIdSetJson.add( s.getUserPrincipal() != null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID("" + s.getUserProperties().get("user")) );
-                    }
-                    for (Session s : sessionList) {
-						logger.info("+++ Session: " + count++ + " - " + session + ", " +
-                                (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user"))));
+						logger.info("+++ Session: " + count++ + " - " + session + ", " + user);
 						s.getBasicRemote().sendText(message.toString());
                         // send userId
                         JsonObjectBuilder jsonModel = Json.createObjectBuilder();
                         jsonModel.add("command", "setUserId");
                         jsonModel.add("userId", (s.getUserPrincipal()!=null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID(""+s.getUserProperties().get("user"))));
-                        jsonModel.add("userIdSet", userIdSetJson.build());
+                        jsonModel.add("maintenance", session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : "");
                         s.getBasicRemote().sendText(jsonModel.build().toString());
 					}
 				} catch (Exception e) {
