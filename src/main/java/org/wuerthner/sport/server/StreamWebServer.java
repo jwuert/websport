@@ -63,6 +63,8 @@ public class StreamWebServer {
 	
 	@OnOpen
 	public void onOpen(Session session, EndpointConfig config) throws Exception {
+        session.setMaxTextMessageBufferSize(3 * 1024 * 1024); // 1 MB
+        session.setMaxBinaryMessageBufferSize(3 * 1024 * 1024); // optional
 		logger.info("Server.onOpen(), sessionId=" + (session != null ? session.getId() : "(null session)"));
         HttpSession httpSession = (HttpSession) config.getUserProperties().get("httpSession");
         Boolean justLoggedIn = false;
@@ -176,21 +178,10 @@ public class StreamWebServer {
 		if (session != null) {
             logger.info("***********");
             logger.info("QS: " + session.getQueryString());
-            logger.info("container: " + session.getContainer().toString());
-            logger.info("open sessions: " + session.getOpenSessions().size());
-            logger.info("param: " + session.getPathParameters());
-            logger.info("req: " + session.getRequestParameterMap());
-            logger.info("uri: " + session.getRequestURI());
-            logger.info(session.getMessageHandlers().toString());
-            logger.info("--------------");
             logger.info(reason.toString());
             logger.info("WebSocket closed: " + session.getId() +
                     ", code=" + reason.getCloseCode() +
                     ", reason=" + reason.getReasonPhrase());
-
-//            JsonObjectBuilder jsonModel = Json.createObjectBuilder();
-//            jsonModel.add("command", "nocommand");
-//            sendMessage(session, jsonModel.build());
             String uid = (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
             logger.info("Server.onClose(), closing session for user " + uid + ", session " + session.getId());
 			sessionList.remove(session);
