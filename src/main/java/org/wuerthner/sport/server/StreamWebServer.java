@@ -76,11 +76,12 @@ public class StreamWebServer {
         }
 		if (session != null) {
             String userId = (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
-            System.out.println("User ID: " + userId + " logged in via: " + (session.getUserPrincipal()==null?"UUID":"Authentication"));
-            System.out.println("Just logged in: " + justLoggedIn);
+            logger.info("User ID: " + userId + " logged in via: " + (session.getUserPrincipal()==null?"UUID":"Authentication"));
+            logger.info("Just logged in: " + justLoggedIn);
             Map<String,String> userMap = dao.getUserMap();
             if (userMap.get(userId)==null) {
                 // if userId is not in our user-map, then close session:
+                logger.info("User " + userId + " not registered. Closing session!");
                 JsonObjectBuilder jsonModel = Json.createObjectBuilder();
                 jsonModel.add("command", "info");
                 jsonModel.add("header", "info");
@@ -90,15 +91,18 @@ public class StreamWebServer {
             } else {
                 if (session.getUserPrincipal() != null) {
                     // editing mode - if there already is someone else editing, close session!
+                    logger.info("User " + userId + " logging in for maintenance!");
                     String maintenance = null;
                     for (Session s : sessionList) {
                         if (s.getUserPrincipal() != null) {
                             maintenance = s.getUserPrincipal().getName();
                         }
                     }
-                    System.out.println("///// user: " + userId + ", maintenance: " + maintenance);
+                    if (maintenance != null) {
+                        logger.info("maintenance: " + maintenance);
+                    }
                     if (maintenance != null && !maintenance.equals(userId)) {
-                        System.out.println("Session will be closed due to maintenance");
+                        logger.info("Session for user " + userId + " will be closed due to maintenance");
                         JsonObjectBuilder jsonModel = Json.createObjectBuilder();
                         jsonModel.add("command", "info");
                         jsonModel.add("header", "Wartungsarbeiten");
@@ -108,6 +112,7 @@ public class StreamWebServer {
                     }
                 }
                 if (session.isOpen()) {
+                    logger.info("User " + userId + ", session " + session.getId() + " has logged in");
                     sessionList.add(session);
                     JsonObjectBuilder jsonUserMap = Json.createObjectBuilder();
                     for (Map.Entry<String, String> entry : userMap.entrySet()) {
@@ -172,8 +177,10 @@ public class StreamWebServer {
 //            JsonObjectBuilder jsonModel = Json.createObjectBuilder();
 //            jsonModel.add("command", "nocommand");
 //            sendMessage(session, jsonModel.build());
+            String uid = (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
+            logger.info("Server.onClose(), closing session for user " + uid + ", session " + session.getId());
 			sessionList.remove(session);
-			logger.info("Server.onClose(), sessionId=" + (session != null ? session.getId() : "(null session)"));
+            session.close();
 		}
 	}
 	
@@ -230,7 +237,7 @@ public class StreamWebServer {
 						}
 						Map<String, String> parameterMap = SpeedyJson.jsonToMap(jsonObject);
 						parameterMap.put(Model.REFERENCE_FILE, null);
-						System.out.println("root: " + rootElement);
+						// System.out.println("root: " + rootElement);
                         Map<String, Object> resultMap = new HashMap<>();
                         try {
 						    resultMap = actionOptional.get().invoke(factory, new ModelState(rootElement, selectedElement, auxElement), parameterMap);
@@ -238,7 +245,7 @@ public class StreamWebServer {
                             error = "Bitte erneut versuchen!";
                         }
                         resultMap.put("senderId", session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
-						System.out.println("ResultMap: " + resultMap);
+						// System.out.println("ResultMap: " + resultMap);
 						JsonObject response = SpeedyJson.createCommandMessageFromMap(resultMap);
 						sendMessage(session, response);
                         if (error!=null) {
@@ -287,13 +294,16 @@ public class StreamWebServer {
 
 
                     String user = (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
+                    logger.info("User " + user + ", session " + session.getId());
                     for (Session s : List.copyOf(sessionList)) {
-						logger.info("+++ Session: " + count++ + " - " + session + ", " + user);
+                        String uid = (s.getUserPrincipal()!=null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID(""+s.getUserProperties().get("user")));
+						logger.info("+++ Session: " + count++ + " - " + uid + ", session " + s.getId());
 						s.getBasicRemote().sendText(message.toString());
                         // send userId
+
                         JsonObjectBuilder jsonModel = Json.createObjectBuilder();
                         jsonModel.add("command", "setUserId");
-                        jsonModel.add("userId", (s.getUserPrincipal()!=null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID(""+s.getUserProperties().get("user"))));
+                        jsonModel.add("userId", uid);
                         jsonModel.add("maintenance", session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : "");
                         s.getBasicRemote().sendText(jsonModel.build().toString());
 					}
