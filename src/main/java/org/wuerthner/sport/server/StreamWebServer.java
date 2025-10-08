@@ -172,8 +172,22 @@ public class StreamWebServer {
 	}
 	
 	@OnClose
-	public void onClose(Session session) throws Exception {
+	public void onClose(Session session, CloseReason reason) throws Exception {
 		if (session != null) {
+            logger.info("***********");
+            logger.info("QS: " + session.getQueryString());
+            logger.info("container: " + session.getContainer().toString());
+            logger.info("open sessions: " + session.getOpenSessions().size());
+            logger.info("param: " + session.getPathParameters());
+            logger.info("req: " + session.getRequestParameterMap());
+            logger.info("uri: " + session.getRequestURI());
+            logger.info(session.getMessageHandlers().toString());
+            logger.info("--------------");
+            logger.info(reason.toString());
+            logger.info("WebSocket closed: " + session.getId() +
+                    ", code=" + reason.getCloseCode() +
+                    ", reason=" + reason.getReasonPhrase());
+
 //            JsonObjectBuilder jsonModel = Json.createObjectBuilder();
 //            jsonModel.add("command", "nocommand");
 //            sendMessage(session, jsonModel.build());
@@ -270,12 +284,12 @@ public class StreamWebServer {
 			}
 		}
 	}
-	
-	@OnError
-	public void onError(final Throwable throwable) {
-		logger.error("system: *ERROR* " + throwable.getMessage());
-		throwable.printStackTrace();
-	}
+
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        System.err.println("WebSocket error: " + throwable.getMessage());
+        throwable.printStackTrace();
+    }
 	
 	public void sendMessage(Session session, JsonObject message) {
 		synchronized (session) {
