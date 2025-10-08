@@ -80,6 +80,7 @@ public class StreamWebServer {
             System.out.println("Just logged in: " + justLoggedIn);
             Map<String,String> userMap = dao.getUserMap();
             if (userMap.get(userId)==null) {
+                // if userId is not in our user-map, then close session:
                 JsonObjectBuilder jsonModel = Json.createObjectBuilder();
                 jsonModel.add("command", "info");
                 jsonModel.add("header", "info");
@@ -88,7 +89,7 @@ public class StreamWebServer {
                 session.close();
             } else {
                 if (session.getUserPrincipal() != null) {
-                    // editing mode - if there already is someone editing, close session!
+                    // editing mode - if there already is someone else editing, close session!
                     String maintenance = null;
                     for (Session s : sessionList) {
                         if (s.getUserPrincipal() != null) {
@@ -285,14 +286,8 @@ public class StreamWebServer {
                     //).collect(Collectors.toSet());
 
 
-//                    JsonObjectBuilder userMaintenanceMap = Json.createObjectBuilder();
-//                    for (Session s : sessionList) {
-//                        userMaintenanceMap.add( s.getUserPrincipal() != null ? s.getUserPrincipal().getName() : dao.getUserIdByUUID("" + s.getUserProperties().get("user")),
-//                                s.getUserPrincipal() != null );
-//                    }
                     String user = (session.getUserPrincipal()!=null ? session.getUserPrincipal().getName() : dao.getUserIdByUUID(""+session.getUserProperties().get("user")));
-//                    JsonObject maintenance = userMaintenanceMap.build();
-                    for (Session s : sessionList) {
+                    for (Session s : List.copyOf(sessionList)) {
 						logger.info("+++ Session: " + count++ + " - " + session + ", " + user);
 						s.getBasicRemote().sendText(message.toString());
                         // send userId
