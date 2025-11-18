@@ -91,27 +91,28 @@ public class StreamWebServer {
                 session.getBasicRemote().sendText(jsonModel.build().toString());
                 session.close();
             } else {
+                String maintenance = null;
+                for (Session s : sessionList) {
+                    if (s.getUserPrincipal() != null) {
+                        // this user is currently logged in for maintenance:
+                        maintenance = s.getUserPrincipal().getName();
+                    }
+                }
                 if (session.getUserPrincipal() != null) {
                     // editing mode - if there already is someone else editing, close session!
                     logger.info("User " + userId + " logging in for maintenance!");
-                    String maintenance = null;
-                    for (Session s : sessionList) {
-                        if (s.getUserPrincipal() != null) {
-                            maintenance = s.getUserPrincipal().getName();
-                        }
-                    }
                     if (maintenance != null) {
-                        logger.info("maintenance: " + maintenance);
+                        logger.info("currently in maintenance by: " + maintenance);
                     }
-                    if (maintenance != null && !maintenance.equals(userId)) {
-                        logger.info("Session for user " + userId + " will be closed due to maintenance");
-                        JsonObjectBuilder jsonModel = Json.createObjectBuilder();
-                        jsonModel.add("command", "info");
-                        jsonModel.add("header", "Wartungsarbeiten");
-                        jsonModel.add("message", "Das System wird gerade von " + maintenance + " bearbeitet!");
-                        session.getBasicRemote().sendText(jsonModel.build().toString());
-                        session.close();
-                    }
+                }
+                if (maintenance != null && !maintenance.equals(userId)) {
+                    logger.info("Session for user " + userId + " will be closed due to maintenance");
+                    JsonObjectBuilder jsonModel = Json.createObjectBuilder();
+                    jsonModel.add("command", "info");
+                    jsonModel.add("header", "Wartungsarbeiten");
+                    jsonModel.add("message", "Das System wird gerade von " + maintenance + " bearbeitet!");
+                    session.getBasicRemote().sendText(jsonModel.build().toString());
+                    session.close();
                 }
                 if (session.isOpen()) {
                     logger.info("User " + userId + ", session " + session.getId() + " has logged in");
