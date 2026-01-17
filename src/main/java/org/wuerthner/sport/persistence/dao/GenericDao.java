@@ -1,13 +1,6 @@
 package org.wuerthner.sport.persistence.dao;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import jakarta.ejb.LocalBean;
@@ -476,10 +469,12 @@ public class GenericDao implements UserProvider {
     public Map<String,String> getUserMap() {
         List<String> list = entityManager.createNativeQuery("select concat(concat(concat(concat(u.username, '|'), u.fname), ' '), u.lname) from USER u")
                 .getResultList();
-        Map<String,String> userMap = new HashMap<>();
+        Map<String,String> userMap = new LinkedHashMap<>();
         for (String entry : list) {
             String[] pair = entry.split("\\|");
-            userMap.put(pair[0], pair[1]);
+            if (!pair[0].equals("su")) {
+                userMap.put(pair[0], pair[1]);
+            }
         }
         return userMap;
     }
