@@ -125,7 +125,7 @@ public class StreamWebServer {
                     // send data model:
                     JsonObjectBuilder jsonModel = Json.createObjectBuilder();
                     jsonModel.add("command", "setModel");
-                    jsonModel.add("data", SpeedyJson.createModel(factory));
+                    jsonModel.add("data", SpeedyJson.createModel(dao, factory));
                     jsonModel.add("appName", factory.getAppName());
                     jsonModel.add("userMap", jsonUserMap.build());
                     jsonModel.add("newSession", justLoggedIn);

@@ -14,11 +14,7 @@ import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
 import jakarta.json.JsonValue;
 
-import org.wuerthner.sport.api.Attribute;
-import org.wuerthner.sport.api.Check;
-import org.wuerthner.sport.api.ModelElement;
-import org.wuerthner.sport.api.ModelElementFactory;
-import org.wuerthner.sport.api.Variable;
+import org.wuerthner.sport.api.*;
 import org.wuerthner.sport.api.attributetype.Display;
 import org.wuerthner.sport.api.attributetype.DynamicMapping;
 import org.wuerthner.sport.api.attributetype.DynamicMultiSelect;
@@ -49,8 +45,8 @@ public class SpeedyJson {
 		return json.build();
 	}
 	
-	public static JsonValue createModel(ModelElementFactory factory) {
-		List<ModelElement> elementList = factory.createElementList();
+	public static JsonValue createModel(UserProvider userProvider, ModelElementFactory factory) {
+		List<ModelElement> elementList = factory.createElementList(userProvider);
 		JsonObjectBuilder json = Json.createObjectBuilder();
 		for (ModelElement element : elementList) {
 			JsonObjectBuilder jsonElement = Json.createObjectBuilder();

@@ -10,6 +10,7 @@ import java.util.Optional;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 
+import jakarta.ejb.LocalBean;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.json.JsonObject;
@@ -17,6 +18,7 @@ import jakarta.persistence.*;
 
 import org.wuerthner.sport.api.ModelElement;
 import org.wuerthner.sport.api.ModelElementFactory;
+import org.wuerthner.sport.api.UserProvider;
 import org.wuerthner.sport.core.AbstractModelElement;
 import org.wuerthner.sport.json.SpeedyJson;
 import org.wuerthner.sport.persistence.entity.AttributeEntity;
@@ -25,7 +27,8 @@ import org.wuerthner.sport.persistence.entity.GenericEntity;
 import org.wuerthner.sport.util.Logger;
 
 @Stateless // @Stateless is essential for the FetchType.LAZY of the GenericEntity to work!!!
-public class GenericDao {
+@LocalBean
+public class GenericDao implements UserProvider {
 	private final static String DOCUMENT_QUERY = "select g.id,g.type,a.value from GenericEntity g, AttributeEntity a where g.id=g.parentId and a.parentId=g.id and a.key='id' and g.deleted=0";
 	private final static String DOCUMENT_TYPE_QUERY = "select g.id,g.type,g.type from GenericEntity g where g.deleted=0 and g.inClipboard=0 and g.id=g.parentId";
 	private final static String DOCUMENT_TYPE_QUERY2 = "select g from GenericEntity g where g.deleted=0 and g.inClipboard=0 and g.id=g.parentId and g.type=:type";
