@@ -134,7 +134,7 @@ function makeBSInputField(element, meta, attributeName, value, editPermission, s
 		if (showLabel) {
 			code += "<label for='attribute_"+id+"."+attributeName+"' style='margin-bottom:0'>"+label+"</label>";
 		}
-		code += "<select multiple='multiple' class='form-control' name='attribute_"+id+"."+attributeName+"' id='attribute_"+id+"."+attributeName + "' " + theEvent + " " + readOnly+disabled+">";
+		code += "<select multiple='multiple' style='height:500px' class='form-control' name='attribute_"+id+"."+attributeName+"' id='attribute_"+id+"."+attributeName + "' " + theEvent + " " + readOnly+disabled+">";
 		for (var itemValue in items) {
 			var selected = (containsValue(value, itemValue) ? "selected" : "");
 			var itemLabel = items[itemValue];
