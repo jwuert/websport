@@ -13,8 +13,6 @@ function selectElement(id, editorType) {
 	var html = "";
 	if (element) {
 		var onclick = "setEditor(this.getAttribute(\"value\"))";
-		console.log("element.type: " + element.type + ", m: " + _model[element.type]);
-
 		var childTypes = _model[element.type].childTypes;
 		var childCategories = [...new Set(childTypes.map( tp => _model[tp].category ))];
 		html += "<nav>";
@@ -87,7 +85,7 @@ function makeTableEditor(element, editPermission, category) {
 	html += "<th width='70px;'></th>";
 	for (var key in _model[category].attributes) {
 		var attr = _model[category].attributes[key];
-		if (attr.type != "Display" && attr.type != "Textarea" && attr.type != "StaticMultiSelect" && attr.type != "DynamicMultiSelect" && attr.class != "ClassAttribute") {
+		if (attr.type != "Display" && attr.type != "Textarea" && attr.type != "DynamicMultiSelect" && attr.class != "ClassAttribute") {
 			html += "<th>";
 			html += attr.label;
 			html += "</th>";
@@ -108,7 +106,7 @@ function makeTableEditor(element, editPermission, category) {
 			html += "</tr></table></td>";
 			for (var key in _model[category].attributes) {
 				var attr = _model[category].attributes[key];
-				if (attr.type != "Display" && attr.type != "Textarea" && attr.type != "StaticMultiSelect" && attr.type != "DynamicMultiSelect" && attr.class != "ClassAttribute") {
+				if (attr.type != "Display" && attr.type != "Textarea" && attr.type != "DynamicMultiSelect" && attr.class != "ClassAttribute") {
 					var meta = _model[category]["attributes"][key];
 					var value = child.attributes[key];
 					if (!value) { value = ""; }

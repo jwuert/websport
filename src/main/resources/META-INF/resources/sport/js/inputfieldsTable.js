@@ -14,72 +14,89 @@ function makeTableInputField(element, attributeName, editPermission) {
 		var readOnly = (meta["readonly"] || (!editPermission)) ? "readOnly " : "";
 		var disabled = depResolved ? "" : "disabled ";
 		if (!value) { value = ""; }
-		
-			if (type === "Text") {
-				//
-				// TEXT
-				//
-				theValue = "value=\"" + value + "\"";
-				theEvent = "onblur=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\" ";
-				theEvent += "onkeydown=\"javascript:if (event.keyCode == 13) { performSetAttributeValue(getElement(_data,"+id+"), " + "'" + attributeName + "', this.value);}\" ";
-				code += "<input class='tableField' type='text' name='attribute_"+id+"."+attributeName+"' id='attribute_"+id+"."+attributeName+"' "+theValue+" " + theEvent + " " + readOnly+disabled + "></input>";
-				
-			} else if (type === "Alternative") {
-				//
-				// ALTERNATIVE
-				//
-				theEvent = "onchange=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.checked.toString());\" ";
-				theValue = (value==="true" ? "checked" : "");
-				code += "<input id='attribute_"+id+"."+attributeName+"' type='checkbox' " + theValue + " " + theEvent + " " + readOnly+disabled +" />";
-				
-			} else if (type === "Chooser") {
-				//
-				// CHOOSER
-				//
-				code += "-";
-				
-			} else if (type === "StaticMapping") {
-				//
-				// STATIC MAPPING
-				//
-				var items = meta["items"];
-				theEvent  = "onblur=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\" ";
-				theEvent += "onclick=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\"";
-				code += "<select class='tableField' name='attribute_"+id+"."+attributeName+"' id='attribute_"+id+"."+attributeName + "' " + theEvent + " " + readOnly+disabled+">";
-				code += "<option value=''></option>";
-				for (var itemValue in items) {
-					var selected = (itemValue === value ? "selected" : "");
-					var itemLabel = items[itemValue];
-					code += "<option " + selected + " value='" + itemValue + "'>" + itemLabel + "</option>";
-				}
-				code += "</select>";
 
-			} else if (type === "DynamicMapping") {
-				//
-				// DYNAMIC MAPPING
-				//
-				var items = {};
-				items[""] = "";
-				var elementList = lookupElement(_data, meta.elementFilterType);
-				for (var i=0; i<elementList.length; i++) {
-					var res = resolveCheck(meta.elementFilterCheck, elementList[i], null);
-					if (res) {
-						items[elementList[i].attributes.id] = elementList[i].attributes.id;
-					}
-				}
-				
-				theEvent  = "onblur=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\" ";
-				theEvent += "onclick=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\"";
-				code += "<select class='tableField' name='attribute_"+id+"."+attributeName+"' id='attribute_"+id+"."+attributeName + "' " + theEvent + " " + readOnly+disabled+">";
-				for (var itemValue in items) {
-					var selected = (itemValue === value ? "selected" : "");
-					var itemLabel = items[itemValue];
-					code += "<option " + selected + " value='" + itemValue + "'>" + itemLabel + "</option>";
-				}
-				code += "</select>";
-				
-			}
-		
+        if (type === "Text") {
+            //
+            // TEXT
+            //
+            theValue = "value=\"" + value + "\"";
+            theEvent = "onblur=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\" ";
+            theEvent += "onkeydown=\"javascript:if (event.keyCode == 13) { performSetAttributeValue(getElement(_data,"+id+"), " + "'" + attributeName + "', this.value);}\" ";
+            code += "<input class='tableField' type='text' name='attribute_"+id+"."+attributeName+"' id='attribute_"+id+"."+attributeName+"' "+theValue+" " + theEvent + " " + readOnly+disabled + "></input>";
+
+        } else if (type === "Alternative") {
+            //
+            // ALTERNATIVE
+            //
+            theEvent = "onchange=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.checked.toString());\" ";
+            theValue = (value==="true" ? "checked" : "");
+            code += "<input id='attribute_"+id+"."+attributeName+"' type='checkbox' " + theValue + " " + theEvent + " " + readOnly+disabled +" />";
+
+        } else if (type === "Chooser") {
+            //
+            // CHOOSER
+            //
+            code += "-";
+
+        } else if (type === "StaticMapping") {
+            //
+            // STATIC MAPPING
+            //
+            var items = meta["items"];
+            theEvent  = "onblur=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\" ";
+            theEvent += "onclick=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\"";
+            code += "<select class='tableField' name='attribute_"+id+"."+attributeName+"' id='attribute_"+id+"."+attributeName + "' " + theEvent + " " + readOnly+disabled+">";
+            code += "<option value=''></option>";
+            for (var itemValue in items) {
+                var selected = (itemValue === value ? "selected" : "");
+                var itemLabel = items[itemValue];
+                code += "<option " + selected + " value='" + itemValue + "'>" + itemLabel + "</option>";
+            }
+            code += "</select>";
+
+        } else if (type === "StaticMultiSelect") {
+            //
+            // STATIC MULTI SELECT: only display!
+            //
+            if (value) {
+                var sep = "";
+                for (var user in value) {
+                    if (value[user] && _userMap) {
+                        code += sep;
+                        code += "" + _userMap[value[user]];
+                        sep = ", ";
+                    }
+                }
+            } else {
+                code += "-";
+            }
+
+        } else if (type === "DynamicMapping") {
+            //
+            // DYNAMIC MAPPING
+            //
+            var items = {};
+            items[""] = "";
+            var elementList = lookupElement(_data, meta.elementFilterType);
+            for (var i=0; i<elementList.length; i++) {
+                var res = resolveCheck(meta.elementFilterCheck, elementList[i], null);
+                if (res) {
+                    items[elementList[i].attributes.id] = elementList[i].attributes.id;
+                }
+            }
+
+            theEvent  = "onblur=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\" ";
+            theEvent += "onclick=\"javascript:performSetAttributeValue(getElement(_data,"+id+"), '" + attributeName + "', this.value);\"";
+            code += "<select class='tableField' name='attribute_"+id+"."+attributeName+"' id='attribute_"+id+"."+attributeName + "' " + theEvent + " " + readOnly+disabled+">";
+            for (var itemValue in items) {
+                var selected = (itemValue === value ? "selected" : "");
+                var itemLabel = items[itemValue];
+                code += "<option " + selected + " value='" + itemValue + "'>" + itemLabel + "</option>";
+            }
+            code += "</select>";
+
+        }
+
 /*
 		if ((attributeType === "MappedSelectableStringAttribute") || (attributeType === "SelectableStringAttribute")) {
 			//

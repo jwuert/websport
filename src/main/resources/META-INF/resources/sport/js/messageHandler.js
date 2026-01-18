@@ -35,6 +35,7 @@ function handleMessage(ws, data) {
 	} else if (command==="setModel") {
 		_model = jo["data"];
 		_appName = jo["appName"];
+		_userMap = jo["userMap"];
 		document.getElementById("appName").innerHTML = _appName;
 		var newSession = jo["newSession"]
 		console.log("New Session: " + newSession);
