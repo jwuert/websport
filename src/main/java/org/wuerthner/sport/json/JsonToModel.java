@@ -85,6 +85,7 @@ public class JsonToModel {
 				element.performTransientSetAttributeValueOperation(attribute, attribute.getValue(value));
 			}
 		}
+        System.out.println("## new " + element.getTechnicalId() + ": " + element.getId() + " [" + element.getType() + "]");
 		List<Long> jsonIdList = new ArrayList<>();
 		// add the children from the json array:
 		for (int i = 0; i < jsonChildren.size(); i++) {
@@ -92,7 +93,8 @@ public class JsonToModel {
 			ModelElement modelElementChild = mergeTree(element, jsonChild, preliminaryIdMap);
 			// if (!element.getChildren().stream().filter(el -> el.getCategory().equals(modelElementChild.getCategory())).map(el -> el.getOrder()).collect(Collectors.toList()).contains(modelElementChild.getOrder())) {
 			// is this correct?
-			if (!element.getChildren().stream().map(el -> el.getId()).collect(Collectors.toList()).contains(modelElementChild.getId())) {
+			if (!element.getChildren().stream().map(el -> el.getId()+"|"+el.getType()).collect(Collectors.toList())
+                    .contains(modelElementChild.getId()+"|"+modelElementChild.getType())) {
 				((AbstractModelElement) element).addChild(modelElementChild); // ###
 			}
 			jsonIdList.add(modelElementChild.getTechnicalId());
@@ -100,6 +102,7 @@ public class JsonToModel {
 		// remove the children that are not part of the json array:
 		List<ModelElement> toBeRemoved = element.getChildren().stream().filter(child -> !jsonIdList.contains(child.getTechnicalId())).collect(Collectors.toList());
 		for (ModelElement child : toBeRemoved) {
+            System.out.println("## REMOVE " + child.getId() + " [" + child.getType() + "]");
 			element.performTransientRemoveChildOperation(child);
 			genericDao.persistTree(child);
 		}
