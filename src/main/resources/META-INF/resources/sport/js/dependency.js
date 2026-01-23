@@ -47,6 +47,9 @@ function resolveCheck(check, element, key) {
 	case "Completeness":
 		result = checkCompleteness(check, element, key);
 		break;
+    case "IdAvailableCheck":
+		result = checkIdAvailableCheck(check, element, key);
+		break;
 	case "Equality":
 		result = checkEquality(check, element, key);
 		break;
@@ -139,6 +142,31 @@ function checkCompleteness(check, element, key) {
 	    attributeValue = element.attributes[key];	
 	}
 	return attributeValue!=null && attributeValue!="";
+}
+
+function checkIdAvailableCheck(check, element, key) {
+    // checks if the value is an actual id in the data model
+    //
+    // properties: type
+    //
+    var type = check.type;
+    var result = false;
+    var attributeValue = element.attributes[key];
+    if (type) {
+        var list = lookupElement(_data, type);
+        for (var i=0; i<list.length; i++) {
+            if (list[i].attributes["id"]===attributeValue) {
+                result = true;
+                break;
+            }
+        }
+    } else {
+        var list = lookupElementById(_data, attributeValue);
+        if (list.length>0) {
+            result = true;
+        }
+    }
+    return result;
 }
 
 function checkComparison(check, element, key) {

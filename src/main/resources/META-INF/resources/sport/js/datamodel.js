@@ -63,6 +63,17 @@ function lookupElementDepth(data, type, depth) {
 	return list;
 }
 
+function lookupElementById(data, id) {
+	var list = [];
+	if (data.attributes["id"]===id) {
+		list.push(data);
+	}
+    for (var i=0; i<data.children.length; i++) {
+        Array.prototype.push.apply(list, lookupElementById(data.children[i], id));
+    }
+	return list;
+}
+
 function getElement(data,id) {
 	if (data["id"]===id) {
 		return data;

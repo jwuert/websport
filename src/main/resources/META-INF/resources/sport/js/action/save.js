@@ -15,7 +15,8 @@ class SaveAction {
 	
 	invoke(result) {
 		if (ws) {
-			console.log("save data length: " + ("{\"command\":\"save\", \"data\":" + JSON.stringify(_data) + ", \"selectedId\":" + _selection.id + "}").length);
+			// console.log("save data length: " + ("{\"command\":\"save\", \"data\":" + JSON.stringify(_data) + ", \"selectedId\":" + _selection.id + "}").length);
+			ws.send("{\"command\":\"validate\", \"data\":" + JSON.stringify(_data) + "}");
 			ws.send("{\"command\":\"save\", \"data\":" + JSON.stringify(_data) + ", \"selectedId\":" + _selection.id + "}");
 			_dirty = false;
 		    _history = [];

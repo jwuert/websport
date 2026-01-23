@@ -16,7 +16,8 @@ class NewElementAction {
 			var tp = sample.childTypes[i];
 			typeMap[tp] = tp;
 		}
-		var paramSelectType = {name:"type", label:"Type", type:"select", codeList:typeMap, defaultValue:"Project"};
+		var defaultSelection = (_folderSelection ? _folderSelection : "Project");
+		var paramSelectType = {name:"type", label:"Type", type:"select", codeList:typeMap, defaultValue:defaultSelection};
 		var parameterList = [paramSelectType];
 		dialog("newElement", "New Element", parameterList);
 	}

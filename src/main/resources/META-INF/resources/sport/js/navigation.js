@@ -57,7 +57,7 @@ function buildNavigation(data, toplevel) {
 			var category = cTypes[t];
 			expanded = _expandeNode[category];
 			html += "<span value=\""+category+"\" class=\"caret" + (expanded ? " caret-down" : "") + "\"></span>";
-			html += "<a id='nav_"+category+"' href=\"javascript:selectCategory('" + category + "', '" + children.filter((el,index) => (el.type==category)).length + "')\" class='navUnselected'>" + category + "</a>";
+			html += "<a id='nav_"+category+"' href=\"javascript:selectCategory('" + category + "', " + data.parentId + ", '" + children.filter((el,index) => (el.type==category)).length + "')\" class='navUnselected'>" + category + "</a>";
 			html += "<ul class=\"nested" + (expanded ? " active" : "") + "\">";
 			for (var i=0; i<children.length; i++) {
 				if (children[i].type==category) {

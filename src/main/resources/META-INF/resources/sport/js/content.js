@@ -127,8 +127,12 @@ function makeTableEditor(element, editPermission, category) {
 	return html
 }
 
-function selectCategory(categoryName, numberOfElements) {
-	_selection = null;
+function selectCategory(categoryName, parentId, numberOfElements) {
+    if (parentId) {
+	    _selection = getElement(_data, parentId);
+	} else {
+	    _selection = null;
+	}
 	_folderSelection = categoryName;
 	renderSelectedNavItem(categoryName);
 	var html = "<br/><br/><br/><br/><br/><br/><br/>";
