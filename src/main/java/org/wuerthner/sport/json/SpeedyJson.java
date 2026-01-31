@@ -1,9 +1,7 @@
 package org.wuerthner.sport.json;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
@@ -207,8 +205,11 @@ public class SpeedyJson {
 			} else {
 				String value = element.getAttributeValue(attribute.getName());
 				if (attribute instanceof StaticMultiSelect || attribute instanceof DynamicMultiSelect) {
-					jsonAttributes.add(key,jsonify(value));
-				} else {
+                    jsonAttributes.add(key, jsonify(value));
+                } else if (Date.class.isAssignableFrom(attribute.getValueType())) {
+                    Date attributeValue = (Date) element.getAttributeValue(attribute);
+                    jsonAttributes.add(key, attributeValue.toLocaleString());
+                } else {
 					jsonAttributes.add(key, value);
 				}
 			}
