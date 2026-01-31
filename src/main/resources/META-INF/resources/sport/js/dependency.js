@@ -102,7 +102,8 @@ function checkNot(check, element, key) {
 	//
 	// properties innerCheck
 	//
-	var innerCheck = JSON.parse(check.innerCheck);
+	// var innerCheck = JSON.parse(check.innerCheck);
+	var innerCheck = parseString(check.innerCheck);
 	var result = resolveCheck(innerCheck, element, key);
 	return (!result);
 }
@@ -111,8 +112,8 @@ function checkAnd(check, element, key) {
 	//
 	// properties innerCheck1, innerCheck2
 	//
-	var innerCheck1 = JSON.parse(check.innerCheck1);
-	var innerCheck2 = JSON.parse(check.innerCheck2);
+	var innerCheck1 = parseString(check.innerCheck1);
+	var innerCheck2 = parseString(check.innerCheck2);
 	var result1 = resolveCheck(innerCheck1, element, key);
 	var result2 = resolveCheck(innerCheck2, element, key);
 	return result1 && result2;
@@ -122,8 +123,8 @@ function checkOr(check, element, key) {
 	//
 	// properties innerCheck1, innerCheck2
 	//
-	var innerCheck1 = JSON.parse(check.innerCheck1);
-	var innerCheck2 = JSON.parse(check.innerCheck2);
+	var innerCheck1 = parseString(check.innerCheck1);
+	var innerCheck2 = parseString(check.innerCheck2);
 	var result1 = resolveCheck(innerCheck1, element, key);
 	var result2 = resolveCheck(innerCheck2, element, key);
 	return result1 || result2;
@@ -206,7 +207,8 @@ function checkConditionalMatch(check, element, key) {
 	//
 	// properties: conditionalAttribute, value (a json map)
 	//
-	var valMap = JSON.parse(check.value);
+	// var valMap = JSON.parse(check.value);
+	valMap = parseString(check.value);
 	var conditionalValue = element.attributes[check.conditionalAttribute];
 	var pattern = valMap[conditionalValue];
 	var re = new RegExp(pattern);
@@ -284,3 +286,18 @@ function attributeContains(check, element, key) {
 	console.log("??? " + thatValue + " ~ " + list);
 	return ((","+list+",").includes(","+thatValue+","));
 }
+
+function parseString(input) {
+    const obj = Object.fromEntries(
+      input
+        .slice(1, -1) // remove { }
+        .split(/,\s*(?=[^=]+=)/) // split on commas before next key
+        .map(pair => {
+          const [key, ...rest] = pair.split("=");
+          return [key, rest.join("=")];
+        })
+    );
+    return obj;
+}
+
+
